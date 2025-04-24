@@ -1,0 +1,416 @@
+openapi: 3.0.4
+info:
+  title: Interlimpia API
+  description: |-
+    API para la aplicación de consulta de productos de limpieza Interlimpia.
+    
+    Esta API permite a los vendedores consultar productos y precios, y al administrador gestionar el catálogo.
+    Se diseñó siguiendo los requisitos de Interlimpia S.A., distribuidora de artículos de limpieza que opera en la Región de Cuyo, Argentina.
+  termsOfService: https://www.interlimpia.com/terms/
+  contact:
+    email: dev@interlimpia.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Más información sobre Interlimpia
+  url: https://www.interlimpia.com
+servers:
+  - url: https://api.interlimpia.com/v1
+    description: Servidor de producción
+  - url: https://dev-api.interlimpia.com/v1
+    description: Servidor de desarrollo
+tags:
+  - name: productos
+    description: Operaciones relacionadas con productos
+  - name: categorias
+    description: Operaciones relacionadas con categorías
+  - name: administracion
+    description: Operaciones administrativas
+  - name: imagenes
+    description: Operaciones relacionadas con imágenes de productos
+paths:
+  /productos:
+    get:
+      tags:
+        - productos
+      summary: Obtiene la lista de productos
+      description: Retorna una lista de productos que pueden ser filtrados por marca, descripción, nombre o categoría
+      operationId: getProductos
+      parameters:
+        - name: marca
+          in: query
+          description: Filtrar productos por marca
+          schema:
+            type: string
+          required: false
+        - name: descripcion
+          in: query
+          description: Filtrar productos por palabras en la descripción
+          schema:
+            type: string
+          required: false
+        - name: categoria
+          in: query
+          description: Filtrar productos por categoría
+          schema:
+            type: string
+            enum: [limpieza_hogar, limpieza_industrial]
+          required: false
+        - name: nombre
+          in: query
+          description: Filtrar productos por nombre
+          schema:
+            type: string
+          required: false
+      responses:
+        '200':
+          description: Lista de productos encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Producto'
+        '204':
+          description: No hay contenido. El filtro aplicado no encontró coincidencias
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Error inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /productos/{codigo}:
+    get:
+      tags:
+        - productos
+      summary: Obtiene un producto por su código
+      description: Retorna un producto específico según el código interno proporcionado
+      operationId: getProductoByCodigo
+      parameters:
+        - name: codigo
+          in: path
+          description: Código interno del producto
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producto'
+        '404':
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Error inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /categorias:
+    get:
+      tags:
+        - categorias
+      summary: Obtiene todas las categorías disponibles
+      description: Retorna la lista de categorías de productos disponibles
+      operationId: getCategorias
+      responses:
+        '200':
+          description: Lista de categorías encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Categoria'
+        default:
+          description: Error inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - administracion
+      summary: Autenticación de administrador
+      description: Permite a un administrador iniciar sesión en el sistema
+      operationId: loginAdmin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - usuario
+                - contrasena
+              properties:
+                usuario:
+                  type: string
+                  description: Nombre de usuario del administrador
+                contrasena:
+                  type: string
+                  description: Contraseña del administrador
+                  format: password
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Token JWT para autenticación
+                  expiracion:
+                    type: string
+                    format: date-time
+                    description: Fecha y hora de expiración del token
+        '401':
+          description: Credenciales incorrectas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Error inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/productos:
+    post:
+      tags:
+        - administracion
+        - productos
+      summary: Importa una lista de precios
+      description: Permite importar y actualizar precios desde un archivo Excel
+      operationId: importarPrecios
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - archivo
+                - proveedor
+              properties:
+                archivo:
+                  type: string
+                  format: binary
+                  description: Archivo Excel con la lista de precios
+                proveedor:
+                  type: string
+                  enum: [Rey de la limpieza, Mr. Clean, Olimpia, Limpiq]
+                  description: Nombre del proveedor
+      responses:
+        '200':
+          description: Importación exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    description: Mensaje de éxito
+                  productos_actualizados:
+                    type: integer
+                    description: Número de productos actualizados
+                  productos_nuevos:
+                    type: integer
+                    description: Número de productos nuevos añadidos
+        '400':
+          description: Formato de archivo incorrecto o datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Error inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/productos/{codigo}/imagen:
+    put:
+      tags:
+        - administracion
+        - imagenes
+      summary: Sube o actualiza la imagen de un producto
+      description: Permite subir o actualizar la imagen asociada a un producto
+      operationId: actualizarImagenProducto
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          description: Código interno del producto
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - imagen
+              properties:
+                imagen:
+                  type: string
+                  format: binary
+                  description: Imagen del producto (JPG, PNG o GIF, max 2MB)
+      responses:
+        '200':
+          description: Imagen actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    description: Mensaje de éxito
+                  url_imagen:
+                    type: string
+                    description: URL de la imagen actualizada
+        '400':
+          description: Formato de imagen incorrecto o tamaño excedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Error inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Producto:
+      type: object
+      properties:
+        codigo:
+          type: string
+          description: Código interno del producto
+          example: "A123"
+        marca:
+          type: string
+          description: Marca del producto
+          example: "Mr. Clean"
+        descripcion:
+          type: string
+          description: Descripción detallada del producto
+          example: "Limpiador multiusos con aroma a limón"
+        precio:
+          type: number
+          format: float
+          description: Precio de venta actual
+          example: 1250.50
+        categoria:
+          type: string
+          description: Categoría del producto
+          enum: [limpieza_hogar, limpieza_industrial]
+          example: "limpieza_hogar"
+        imagen_url:
+          type: string
+          description: URL de la imagen del producto
+          example: "https://storage.interlimpia.com/productos/A123.jpg"
+        proveedor:
+          type: string
+          description: Nombre del proveedor del producto
+          example: "Rey de la limpieza"
+      required:
+        - codigo
+        - marca
+        - descripcion
+        - precio
+        - categoria
+        - proveedor
+      xml:
+        name: producto
+
+    Categoria:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identificador de la categoría
+          example: "limpieza_hogar"
+        nombre:
+          type: string
+          description: Nombre descriptivo de la categoría
+          example: "Limpieza del hogar"
+      required:
+        - id
+        - nombre
+      xml:
+        name: categoria
+
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          description: Código de error
+          example: 404
+        mensaje:
+          type: string
+          description: Mensaje descriptivo del error
+          example: "Producto no encontrado"
+      required:
+        - codigo
+        - mensaje
+      xml:
+        name: error
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
