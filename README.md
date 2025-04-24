@@ -1,7 +1,7 @@
 # Proyecto Interlimpia
 # Documento de Especificación de Pruebas
-Versión 1.0
-Fecha: 03/04/2025
+Versión 1.1
+Fecha: 24/04/2025
 Preparado para Interlimpia S.A.
 
 ## Historial de Revisiones
@@ -9,6 +9,7 @@ Preparado para Interlimpia S.A.
 | Fecha | Descripción | Autor | Comentarios |
 |-------|------------|-------|------------|
 | 03/04/2025 | Versión 1.0 | F. Caballero, P. Mirazo, F. Lucero, J. Verdini | Borrador Inicial |
+| 24/04/2025 | Versión 1.1 | F. Caballero, P. Mirazo, F. Lucero, J. Verdini | Actualización de arquitectura - Separación de sistema administrativo (MVC) de la API |
 
 ## Aprobación del Documento
 
@@ -45,36 +46,39 @@ El propósito de este documento es definir los requerimientos de prueba para la 
 - **SEGURIDAD:** No se realizarán pruebas específicas de seguridad ya que la aplicación no maneja datos sensibles y operará de forma pública.
 - **PRUEBAS DE FUNCIONALIDAD FUTURA:** La funcionalidad para gestión de pedidos que se implementará en el futuro no será parte de estas pruebas.
 
-### a 1.3 Definiciones, Acrónimos y Abreviaturas
+### 1.3 Definiciones, Acrónimos y Abreviaturas
 
 | Abreviatura | Palabra |
 |-------------|---------|
 | ADM | Administrador |
 | VEN | Vendedor/Transportista |
+| MVC | Modelo-Vista-Controlador |
+| API | Application Programming Interface |
 
 ## 2. Requerimientos Específicos
 
-La aplicación Interlimpia tendrá 2 roles principales:
+El sistema Interlimpia está dividido en dos componentes principales:
+1. **API Pública**: Para consulta de productos por parte de vendedores
+2. **Panel de Administración (MVC)**: Para gestión de productos por parte del administrador
 
-1. Administrador (Gerente de Ventas)
-2. Vendedor/Transportista (Acceso público)
+Cada componente tendrá roles específicos:
 
 ### 2.1 Descripción de Roles
 
-| Rol | Descripción |
-|-----|-------------|
-| Administrador | Responsable de actualizar las listas de precios en el sistema. Único usuario con acceso de escritura en el sistema. El encargado de ventas (gerente) tendrá este rol. |
-| Vendedor/Transportista | Usuario final que consulta los precios de los productos a través de la aplicación móvil. Tendrán acceso público de solo lectura a la información de precios. |
+| Rol | Descripción | Componente |
+|-----|-------------|------------|
+| Administrador | Responsable de actualizar las listas de precios en el sistema. Único usuario con acceso de escritura en el sistema. El encargado de ventas (gerente) tendrá este rol. | Panel de Administración (MVC) |
+| Vendedor/Transportista | Usuario final que consulta los precios de los productos a través de la aplicación móvil. Tendrán acceso público de solo lectura a la información de precios. | API Pública |
 
 ### 2.2 Features por Rol
 
-| Módulo | Roles Aplicables | Descripción |
-|--------|------------------|-------------|
-| Consulta de Precios | ADM, VEN | Permite buscar y visualizar los precios actualizados de los productos. Los vendedores podrán realizar búsquedas por código, por descripción (parcial) o por marca. |
-| Actualización de Listas | ADM | Permite importar y normalizar las listas de precios desde archivos Excel de los cuatro proveedores (Rey de la limpieza, Mr. Clean, Olimpia, Limpiq). |
-| Gestión de Imágenes | ADM | Permite subir, modificar y eliminar imágenes de productos que serán mostradas en la aplicación. |
-| Visualización de Producto | ADM, VEN | Muestra la información completa del producto (código interno, marca, descripción, precio de venta e imagen). |
-| Categorización de Productos | ADM, VEN | Permite categorizar y filtrar productos por tipo (limpieza del hogar, limpieza industrial). |
+| Módulo | Roles Aplicables | Componente | Descripción |
+|--------|------------------|------------|-------------|
+| Consulta de Precios | VEN | API Pública | Permite buscar y visualizar los precios actualizados de los productos. Los vendedores podrán realizar búsquedas por código, por descripción (parcial) o por marca. |
+| Actualización de Listas | ADM | Panel de Administración (MVC) | Permite importar y normalizar las listas de precios desde archivos Excel de los cuatro proveedores (Rey de la limpieza, Mr. Clean, Olimpia, Limpiq). |
+| Gestión de Imágenes | ADM | Panel de Administración (MVC) | Permite subir, modificar y eliminar imágenes de productos que serán mostradas en la aplicación. |
+| Visualización de Producto | VEN | API Pública | Muestra la información completa del producto (código interno, marca, descripción, precio de venta e imagen). |
+| Categorización de Productos | VEN | API Pública | Permite categorizar y filtrar productos por tipo (limpieza del hogar, limpieza industrial). |
 
 ### 2.3 User Stories
 
@@ -172,6 +176,7 @@ La aplicación Interlimpia tendrá 2 roles principales:
 #### TC-01: Búsqueda de producto por código interno válido
 
 **Relacionado con:** US-01  
+**Componente:** API Pública  
 **Objetivo:** Verificar que la búsqueda por código interno muestra la información correcta del producto  
 **Precondiciones:**
 - La aplicación está disponible y funcionando  
@@ -196,6 +201,7 @@ La aplicación Interlimpia tendrá 2 roles principales:
 #### TC-02: Importación de lista de precios con formato correcto
 
 **Relacionado con:** US-02  
+**Componente:** Panel de Administración (MVC)  
 **Objetivo:** Verificar que el administrador puede importar y actualizar listas de precios desde Excel  
 **Precondiciones:**
 - El usuario ha iniciado sesión como administrador
@@ -220,6 +226,7 @@ La aplicación Interlimpia tendrá 2 roles principales:
 #### TC-03: Subida de imagen para un producto existente
 
 **Relacionado con:** US-03  
+**Componente:** Panel de Administración (MVC)  
 **Objetivo:** Verificar que el administrador puede subir una imagen para un producto  
 **Precondiciones:**
 - El usuario ha iniciado sesión como administrador
@@ -245,6 +252,7 @@ La aplicación Interlimpia tendrá 2 roles principales:
 #### TC-04: Filtrado de productos por categoría
 
 **Relacionado con:** US-04  
+**Componente:** API Pública  
 **Objetivo:** Verificar que los productos se pueden filtrar correctamente por categoría  
 **Precondiciones:**
 - La aplicación está disponible y funcionando
@@ -271,64 +279,84 @@ La aplicación Interlimpia tendrá 2 roles principales:
 
 ### 3.1 Arquitectura
 
-La arquitectura de la aplicación Interlimpia ha sido diseñada considerando que los vendedores tienen acceso público de solo lectura, mientras que solo el administrador tiene permisos para modificar los artículos. El sistema se compone de:
+La arquitectura del sistema Interlimpia se divide en dos componentes principales: una API pública para los vendedores y un sistema MVC para el administrador, ambos compartiendo la misma base de datos.
 
 ```mermaid
 graph TD
     A[Aplicación Móvil para Vendedores] -->|Consultas de solo lectura| B[API RESTful]
     B -->|Datos de productos| A
-    C[Panel Web de Administración] -->|Autenticación| B
-    C -->|Gestión de productos| B
-    B -->|Validación de permisos| D[Capa de Seguridad]
     B -->|Almacena/Consulta| E[(Base de Datos)]
-    F[Servicio de Almacenamiento] -->|Imágenes| B
     
-    subgraph "Capa de Presentación"
+    F[Panel Web de Administración] -->|MVC| G[Backend Admin]
+    G -->|Administración de datos| E
+    
+    subgraph "Frontend"
         A
-        C
-    end
-    
-    subgraph "Capa de Servicios"
-        B
-        D
-    end
-    
-    subgraph "Capa de Datos"
-        E
         F
+    end
+    
+    subgraph "Backend"
+        B
+        G
+    end
+    
+    subgraph "Datos"
+        E
     end
 ```
 
-**Componentes principales:**
+**Componentes del sistema:**
 
-1. **Aplicación móvil para vendedores (React Native)**: Interfaz pública de solo lectura que permite a los vendedores consultar precios y productos sin necesidad de autenticación. Funciona en dispositivos Android 10+ e iOS 10+.
+1. **API RESTful (Backend):**
+   - Proporciona endpoints públicos para consulta de productos
+   - Implementa lógica de filtrado y búsqueda
+   - Acceso de solo lectura para los vendedores a través de la aplicación móvil
+   - Está definida en el contrato de API [openapi-interlimpia.yaml](./openapi-interlimpia.yaml)
 
-2. **Panel web de administración**: Interfaz protegida que requiere autenticación, exclusivamente para el administrador. Desde aquí se gestionan productos, precios e imágenes.
+2. **Aplicación Móvil (Frontend):**
+   - Desarrollada en React Native para Android e iOS
+   - Interfaz intuitiva para vendedores/transportistas
+   - Funcionalidad de búsqueda y visualización de productos
 
-3. **API RESTful**: Capa de servicios con puntos de acceso diferenciados:
-   - Endpoints públicos para consultas (sin autenticación)
-   - Endpoints protegidos para operaciones de escritura (requieren autenticación)
+3. **Panel Web de Administración:**
+   - Sistema independiente basado en arquitectura MVC
+   - Acceso exclusivo para administradores
+   - Interfaz para importar listas de precios y gestionar imágenes
 
-4. **Capa de seguridad**: Garantiza que solo el administrador autenticado pueda realizar modificaciones en el sistema.
+4. **Backend de Administración:**
+   - Implementa la lógica de negocio para el panel administrativo
+   - Maneja la autenticación y autorización
+   - Gestiona la importación y normalización de datos
 
-5. **Base de datos**: Almacena información de productos, precios, categorías y usuarios. Incluye estructura de permisos para diferenciar operaciones de lectura y escritura.
+5. **Base de Datos:**
+   - Repositorio central compartido entre la API pública y el sistema administrativo
+   - Almacena información de productos, precios y categorías
 
-6. **Servicio de almacenamiento**: Gestiona las imágenes de los productos, con permisos adecuados para que solo el administrador pueda modificarlas.
+Esta arquitectura garantiza una clara separación entre el acceso público de vendedores (solo lectura) y las funcionalidades administrativas de actualización de datos.
 
-Esta arquitectura asegura:
-- Separación clara entre acceso público (vendedores) y administrativo
-- Seguridad en las operaciones de modificación de datos
-- Rendimiento optimizado para consultas frecuentes
-- Escalabilidad para futuras funcionalidades
+### 3.2 Definición de API
 
-### 3.2 Detalles de Front-End
+La API de Interlimpia está diseñada siguiendo las especificaciones OpenAPI 3.0, proporcionando endpoints públicos para la consulta de productos y categorías.
+
+El contrato completo de la API se encuentra en el archivo [openapi-interlimpia.yaml](./openapi-interlimpia.yaml).
+
+**Características de la API:**
+- Endpoints públicos para consulta de productos y categorías
+- Soporte para filtrado por múltiples criterios
+- Manejo específico de códigos de estado (204 para resultados vacíos, 404 para recursos inexistentes)
+- Documentación completa de parámetros y respuestas
+
+### 3.3 Detalles de Front-End
 
 Esta sección describe el front-end de la aplicación Interlimpia y lista los campos principales de cada módulo.
 
-#### Consulta de Precios
+#### Aplicación Móvil para Vendedores (React Native)
+
+**Consulta de Precios**
 - Código interno (campo de texto)
 - Descripción (campo de texto para búsqueda parcial)
 - Marca (campo de texto)
+- Selector de categoría (desplegable)
 - Botón de búsqueda
 - Lista de resultados mostrando:
   - Imagen del producto
@@ -337,128 +365,177 @@ Esta sección describe el front-end de la aplicación Interlimpia y lista los ca
   - Descripción
   - Precio de venta actual
 
-#### Actualización de Listas (Solo Administrador)
+#### Panel Web de Administración (MVC)
+
+**Login de Administrador**
+- Usuario (campo de texto)
+- Contraseña (campo de contraseña)
+- Botón de inicio de sesión
+
+**Actualización de Listas**
 - Selección de archivo (botón para seleccionar archivo Excel)
 - Selección de proveedor (desplegable: Rey de la limpieza, Mr. Clean, Olimpia, Limpiq)
 - Botón de importar
 - Vista previa de datos importados
 - Botón de confirmar actualización
 
-#### Gestión de Imágenes (Solo Administrador)
+**Gestión de Imágenes**
 - Código interno de producto (campo de texto)
+- Botón para buscar producto
 - Botón para subir imagen
 - Vista previa de imagen
 - Botón de guardar
 - Botón de cancelar
 
-#### Login de Administrador
-- Usuario
-- Contraseña
-- Botón de inicio de sesión
+### 3.4 Requerimientos Técnicos
 
-### 3.3 Requerimientos Técnicos
+#### Componente: Panel de Administración (MVC)
 
-#### Login de Administrador
+**Login de Administrador**
 T1: Usuario - El campo no debe estar vacío
 T2: Contraseña - El campo no debe estar vacío
 
-#### Consulta de Precios
-T3: Código interno - Se permiten solo números y caracteres
-T4: Descripción - Se permiten caracteres alfanuméricos y espacios
-T5: Marca - Se permiten caracteres alfanuméricos y espacios
+**Actualización de Listas**
+T3: Archivo - Debe seleccionarse un archivo
+T4: Archivo - Solo se permiten archivos con extensión .xls o .xlsx
+T5: Proveedor - Debe seleccionarse un proveedor de la lista
 
-#### Actualización de Listas
-T6: Archivo - Debe seleccionarse un archivo
-T7: Archivo - Solo se permiten archivos con extensión .xls o .xlsx
-T8: Proveedor - Debe seleccionarse un proveedor de la lista
+**Gestión de Imágenes**
+T6: Código interno de producto - El campo no debe estar vacío
+T7: Código interno de producto - Solo se permiten números y caracteres
+T8: Imagen - Debe seleccionarse una imagen
+T9: Imagen - Solo se permiten formatos .jpg, .png o .gif
+T10: Imagen - El tamaño máximo permitido es de 2MB
 
-#### Gestión de Imágenes
-T9: Código interno de producto - El campo no debe estar vacío
-T10: Código interno de producto - Solo se permiten números y caracteres
-T11: Imagen - Debe seleccionarse una imagen
-T12: Imagen - Solo se permiten formatos .jpg, .png o .gif
-T13: Imagen - El tamaño máximo permitido es de 2MB
+#### Componente: API Pública
 
-### 3.4 Validaciones Funcionales
+**Consulta de Precios**
+T11: Código interno - Se permiten solo números y caracteres
+T12: Descripción - Se permiten caracteres alfanuméricos y espacios
+T13: Marca - Se permiten caracteres alfanuméricos y espacios
+T14: Categoría - Valor seleccionado de una lista predefinida
 
-#### Consulta de Precios
+### 3.5 Validaciones Funcionales
+
+#### Componente: API Pública
+
+**Consulta de Precios**
 F1: Si el código no existe, el sistema muestra un mensaje indicando que no se encontraron resultados
 F2: Si hay múltiples resultados por descripción o marca, se muestran todos en una lista
 F3: Los precios mostrados deben ser los más actualizados
 F4: El tiempo de respuesta para una búsqueda debe ser menor a 3 segundos
+F5: Al filtrar por categoría, solo se muestran los productos de esa categoría
 
-#### Actualización de Listas
-F5: Si el formato del archivo no es compatible, el sistema muestra un error
-F6: Si hay productos en el archivo que no existen en el sistema, se debe mostrar una opción para agregarlos
-F7: El sistema debe normalizar los datos de las distintas fuentes (proveedores) a un formato común
+#### Componente: Panel de Administración (MVC)
 
-#### Gestión de Imágenes
-F8: Si el código interno de producto no existe, el sistema muestra un error
-F9: Si la imagen no cumple con los requisitos técnicos, el sistema muestra un error
+**Actualización de Listas**
+F6: Si el formato del archivo no es compatible, el sistema muestra un error
+F7: Si hay productos en el archivo que no existen en el sistema, se debe mostrar una opción para agregarlos
+F8: El sistema debe normalizar los datos de las distintas fuentes (proveedores) a un formato común
 
-#### Login de Administrador
-F10: Si las credenciales son incorrectas, el sistema muestra un mensaje de error
+**Gestión de Imágenes**
+F9: Si el código interno de producto no existe, el sistema muestra un error
+F10: Si la imagen no cumple con los requisitos técnicos, el sistema muestra un error
 
-### 3.5 Interfaces Externas
+**Login de Administrador**
+F11: Si las credenciales son incorrectas, el sistema muestra un mensaje de error
 
-#### Compatibilidad con Dispositivos
+### 3.6 Interfaces Externas
+
+#### Componente: Aplicación Móvil para Vendedores
+**Compatibilidad con Dispositivos**
 La aplicación debe funcionar en:
 - Dispositivos Android versión 10.0 o superior
 - Dispositivos iOS versión 10.0 o superior
 
-#### Tecnología de Desarrollo
-La aplicación se desarrollará utilizando React Native para asegurar la compatibilidad con Android e iOS.
+**Tecnología de Desarrollo**
+- Framework: React Native
+- Comunicación con backend: API RESTful
 
-### 3.6 Requisitos No Funcionales
+#### Componente: Panel de Administración
+**Compatibilidad con Navegadores**
+El panel administrativo debe funcionar en:
+- Google Chrome (últimas 2 versiones)
+- Mozilla Firefox (últimas 2 versiones)
+- Safari (últimas 2 versiones)
 
-#### Usabilidad
+**Tecnología de Desarrollo**
+- Patrón: MVC
+- Frontend: React.js
+- Backend: Node.js con Express
+- Comunicación con base de datos: Directa
+
+### 3.7 Requisitos No Funcionales
+
+#### Componente: Aplicación Móvil para Vendedores
+
+**Usabilidad**
 - La aplicación debe ser intuitiva y fácil de usar, permitiendo a los vendedores acceder a la información de precios en menos de 3 toques desde la pantalla principal.
 - El diseño debe usar una paleta de colores sobria similar a Mercado Libre, sin colores brillantes.
 - La interfaz debe ser tan sencilla que cualquier persona sin experiencia pueda aprender a usarla sin capacitación.
 
-#### Rendimiento
+**Rendimiento**
 - Las búsquedas deben devolver resultados en menos de 3 segundos.
 - La aplicación debe ser capaz de manejar eficientemente un catálogo de aproximadamente 400 productos diferentes.
 - Debe soportar consultas frecuentes (cada 10-15 minutos) por parte de 30-40 vendedores simultáneamente.
 
-#### Disponibilidad
+**Disponibilidad**
 - La aplicación estará disponible principalmente durante el horario laboral (8 horas diarias).
 - La aplicación requiere conexión a internet para funcionar (100% online).
 
-### 3.7 Restricciones de Diseño
+#### Componente: Panel de Administración
 
-Los vendedores de Interlimpia S.A. tienen conocimientos tecnológicos muy básicos. Por lo tanto, el sistema debe ser extremadamente intuitivo y fácil de entender, con énfasis en una interfaz limpia y con elementos visuales claros.
+**Usabilidad**
+- La interfaz debe ser clara y organizada por secciones.
+- Debe proporcionar retroalimentación visible para las acciones realizadas.
+
+**Seguridad**
+- Acceso restringido mediante autenticación.
+- Sesiones con tiempo de expiración.
+- Validación de permisos para todas las operaciones de escritura.
 
 ## 4. Casos de Prueba
 
-### Caso de Prueba 1: Búsqueda por Código Interno
+### 4.1 Componente: Aplicación Móvil para Vendedores
+
+#### Caso de Prueba 1: Búsqueda por Código Interno
 **Objetivo:** Verificar que la búsqueda por código interno funciona correctamente.
 **Pasos:**
-1. Abrir la aplicación
+1. Abrir la aplicación móvil
 2. Ingresar un código interno válido en el campo correspondiente
 3. Presionar el botón de búsqueda
 **Resultado Esperado:** Se muestra la información completa del producto incluyendo imagen, código, marca, descripción y precio de venta.
 
-### Caso de Prueba 2: Búsqueda por Descripción Parcial
+#### Caso de Prueba 2: Búsqueda por Descripción Parcial
 **Objetivo:** Verificar que la búsqueda por descripción parcial funciona correctamente.
 **Pasos:**
-1. Abrir la aplicación
+1. Abrir la aplicación móvil
 2. Ingresar una palabra clave en el campo de descripción
 3. Presionar el botón de búsqueda
 **Resultado Esperado:** Se muestra una lista de todos los productos que contienen la palabra clave en su descripción.
 
-### Caso de Prueba 3: Búsqueda por Marca
+#### Caso de Prueba 3: Búsqueda por Marca
 **Objetivo:** Verificar que la búsqueda por marca funciona correctamente.
 **Pasos:**
-1. Abrir la aplicación
+1. Abrir la aplicación móvil
 2. Ingresar una marca en el campo correspondiente
 3. Presionar el botón de búsqueda
 **Resultado Esperado:** Se muestra una lista de todos los productos de la marca especificada.
 
-### Caso de Prueba 4: Actualización de Lista de Precios (Administrador)
+#### Caso de Prueba 4: Filtrado por Categoría
+**Objetivo:** Verificar que el filtrado por categoría funciona correctamente.
+**Pasos:**
+1. Abrir la aplicación móvil
+2. Seleccionar una categoría del desplegable
+3. Observar los resultados mostrados
+**Resultado Esperado:** Se muestra una lista de productos que pertenecen a la categoría seleccionada.
+
+### 4.2 Componente: Panel de Administración (MVC)
+
+#### Caso de Prueba 5: Actualización de Lista de Precios
 **Objetivo:** Verificar que el administrador puede actualizar las listas de precios.
 **Pasos:**
-1. Iniciar sesión como administrador
+1. Iniciar sesión como administrador en el panel web
 2. Acceder a la sección de actualización de listas
 3. Seleccionar un archivo Excel válido
 4. Seleccionar un proveedor
@@ -466,15 +543,23 @@ Los vendedores de Interlimpia S.A. tienen conocimientos tecnológicos muy básic
 6. Confirmar la actualización
 **Resultado Esperado:** El sistema importa y normaliza los datos, actualizando los precios en la base de datos.
 
-### Caso de Prueba 5: Gestión de Imágenes (Administrador)
+#### Caso de Prueba 6: Gestión de Imágenes
 **Objetivo:** Verificar que el administrador puede asociar imágenes a los productos.
 **Pasos:**
-1. Iniciar sesión como administrador
+1. Iniciar sesión como administrador en el panel web
 2. Acceder a la sección de gestión de imágenes
 3. Ingresar un código interno de producto válido
 4. Subir una imagen
 5. Guardar los cambios
 **Resultado Esperado:** La imagen se asocia correctamente al producto y se muestra en las consultas.
+
+#### Caso de Prueba 7: Autenticación de Administrador
+**Objetivo:** Verificar que solo usuarios autorizados pueden acceder al panel de administración.
+**Pasos:**
+1. Acceder a la URL del panel de administración
+2. Ingresar credenciales correctas
+3. Presionar el botón de inicio de sesión
+**Resultado Esperado:** El sistema permite el acceso y muestra el panel con las opciones administrativas.
 
 ## 5. Proceso de Gestión de Cambios
 
@@ -486,13 +571,19 @@ Una vez aprobados, los cambios se realizarán en el documento y la nueva versió
 
 ## 6. Criterios de Aceptación
 
-Para considerar que las pruebas han sido exitosas y que la aplicación está lista para su implementación, se deben cumplir los siguientes criterios:
+Para considerar que las pruebas han sido exitosas y que el sistema está listo para su implementación, se deben cumplir los siguientes criterios:
 
-1. Todas las funcionalidades descritas en el alcance funcionan correctamente.
+### 6.1 Componente: Aplicación Móvil para Vendedores
+1. Todas las funcionalidades de consulta descritas en el alcance funcionan correctamente.
 2. El tiempo de respuesta para las búsquedas es menor a 3 segundos.
 3. La aplicación es compatible con los dispositivos Android 10+ e iOS 10+ especificados.
 4. La interfaz de usuario es intuitiva y fácil de usar, según evaluación del equipo de pruebas.
-5. La actualización de listas de precios por parte del administrador funciona correctamente.
+
+### 6.2 Componente: Panel de Administración (MVC)
+1. La autenticación de administradores funciona correctamente, permitiendo acceso solo a usuarios autorizados.
+2. La actualización de listas de precios importa y procesa correctamente los datos.
+3. La gestión de imágenes permite subir, visualizar y asociar imágenes a los productos.
+4. Los cambios realizados desde el panel administrativo se reflejan correctamente en las consultas realizadas desde la aplicación móvil.
 
 El responsable de aprobar los resultados de las pruebas será Facundo Lucero con el apoyo de Jesús Verdini como tester, quienes deberán verificar que todos los criterios se cumplen antes de dar el visto bueno para la implementación.
 
