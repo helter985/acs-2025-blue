@@ -76,9 +76,235 @@ La aplicación Interlimpia tendrá 2 roles principales:
 | Visualización de Producto | ADM, VEN | Muestra la información completa del producto (código interno, marca, descripción, precio de venta e imagen). |
 | Categorización de Productos | ADM, VEN | Permite categorizar y filtrar productos por tipo (limpieza del hogar, limpieza industrial). |
 
+### 2.3 User Stories
+
+#### US-01: Búsqueda de productos por código
+
+**Como** vendedor de Interlimpia  
+**Quiero** poder buscar productos por su código interno  
+**Para** encontrar rápidamente la información actualizada de precios que necesito mostrar a los clientes  
+
+**Criterios de aceptación:**
+- El sistema debe permitir ingresar el código interno del producto  
+- Al realizar la búsqueda, debe mostrar la información completa del producto:
+  - Código  
+  - Marca  
+  - Descripción  
+  - Precio  
+  - Imagen  
+- Si el código no existe, debe mostrar un mensaje indicando que no se encontraron resultados  
+- El tiempo de respuesta debe ser menor a 3 segundos
+
+#### US-02: Actualización de listas de precios
+
+**Como** administrador del sistema  
+**Quiero** poder importar y actualizar las listas de precios desde archivos Excel de los proveedores  
+**Para** mantener la información de precios actualizada para los vendedores  
+
+**Criterios de aceptación:**
+- El sistema debe permitir seleccionar un archivo Excel para importar
+- Debe permitir seleccionar el proveedor al que corresponde la lista (Rey de la limpieza, Mr. Clean, Olimpia, Limpiq)
+- Debe mostrar una vista previa de los datos antes de confirmar la actualización
+- Al confirmar, debe actualizar los precios en el sistema
+- Si el formato del archivo no es compatible, debe mostrar un mensaje de error
+
+#### US-03: Subir imagen para un producto existente
+
+**Como** administrador del sistema  
+**Quiero** poder subir una imagen para un producto existente  
+**Para** que los clientes puedan visualizar el producto en el catálogo
+
+**Criterios de Aceptación:**
+1. Acceso desde la sección **"Gestión de Imágenes"**.
+2. Búsqueda de productos por **código interno** (ej: `B456`).
+3. Soporte para imágenes en formato **JPG/PNG** (<2MB).
+4. **Vista previa** de la imagen antes de guardar.
+5. **Confirmación** visual al guardar exitosamente.
+6. La imagen debe **asociarse persistentemente** al producto.
+
+**Escenarios:**
+
+*Escenario 1: Subida exitosa*  
+**Dado** que soy un administrador logueado  
+**Y** existe el producto con código `B456`  
+**Cuando** subo una imagen válida (<2MB, JPG/PNG)  
+**Y** confirmo la operación  
+**Entonces** el sistema:
+- Guarda la imagen  
+- Muestra mensaje: _"Imagen asociada correctamente"_  
+- Asocia la imagen al producto en consultas posteriores
+
+*Escenario 2: Imagen con tamaño excedido*  
+**Dado** que soy un administrador logueado  
+**Cuando** intento subir una imagen >2MB  
+**Entonces** el sistema:
+- Muestra error: _"El tamaño máximo es 2MB"_  
+- Cancela el proceso de subida  
+- Mantiene el formulario editable
+
+*Escenario 3: Producto no encontrado*  
+**Dado** que soy un administrador logueado  
+**Cuando** ingreso un código inexistente (ej: `XXX999`)  
+**Entonces** el sistema muestra: _"Producto no encontrado"_
+
+**Metadata:**
+| Campo | Valor |
+|-------------|-----------------|
+| **Prioridad** | Media (🟡) |
+| **Estimación** | 3 story points |
+| **Epic** | Gestión de Catálogo |
+| **Dependencias** | US-01 (Alta de productos) |
+
+#### US-04: Filtrado de productos por categoría
+
+**Como** vendedor de Interlimpia  
+**Quiero** poder filtrar productos por su categoría (limpieza del hogar o industrial)  
+**Para** encontrar más fácilmente los productos que necesito según el tipo de cliente
+
+**Criterios de aceptación:**
+- El sistema debe mostrar opciones para filtrar por categoría (limpieza del hogar, limpieza industrial)
+- Al seleccionar una categoría, debe mostrar solo los productos correspondientes
+- Debe permitir quitar los filtros para ver todos los productos
+- El filtrado debe aplicarse junto con otros criterios de búsqueda (código, descripción, marca)
+
+### 2.4 Test Cases
+
+#### TC-01: Búsqueda de producto por código interno válido
+
+**Relacionado con:** US-01  
+**Objetivo:** Verificar que la búsqueda por código interno muestra la información correcta del producto  
+**Precondiciones:**
+- La aplicación está disponible y funcionando  
+- Existe un producto con código "A123" en el sistema  
+
+**Pasos:**
+1. Abrir la aplicación  
+2. Ingresar "A123" en el campo de código interno  
+3. Presionar el botón de búsqueda  
+
+**Resultado esperado:**
+- Se muestra la información completa del producto con código "A123" incluyendo:  
+  - Código interno: A123  
+  - Marca del producto  
+  - Descripción del producto  
+  - Precio de venta actual  
+  - Imagen del producto (si está disponible)  
+- El tiempo de respuesta es menor a 3 segundos  
+
+**Severidad:** Alta
+
+#### TC-02: Importación de lista de precios con formato correcto
+
+**Relacionado con:** US-02  
+**Objetivo:** Verificar que el administrador puede importar y actualizar listas de precios desde Excel  
+**Precondiciones:**
+- El usuario ha iniciado sesión como administrador
+- Se dispone de un archivo Excel con formato correcto de lista de precios
+
+**Pasos:**
+1. Acceder a la sección "Actualización de Listas"
+2. Hacer clic en "Seleccionar archivo" y elegir el archivo Excel preparado
+3. Seleccionar el proveedor "Rey de la limpieza" del desplegable
+4. Hacer clic en "Importar"
+5. Revisar la vista previa de los datos
+6. Hacer clic en "Confirmar actualización"
+
+**Resultado esperado:**
+- El sistema muestra correctamente la vista previa de los datos del archivo
+- Al confirmar, muestra un mensaje de éxito
+- Los precios de los productos del proveedor "Rey de la limpieza" se actualizan en el sistema
+- Al consultar cualquier producto de este proveedor, se muestra el precio actualizado
+
+**Severidad:** Alta
+
+#### TC-03: Subida de imagen para un producto existente
+
+**Relacionado con:** US-03  
+**Objetivo:** Verificar que el administrador puede subir una imagen para un producto  
+**Precondiciones:**
+- El usuario ha iniciado sesión como administrador
+- Existe un producto con código "B456" en el sistema
+- Se dispone de una imagen en formato JPG de tamaño menor a 2MB
+
+**Pasos:**
+1. Acceder a la sección "Gestión de Imágenes"
+2. Ingresar "B456" en el campo de código interno
+3. Hacer clic en "Buscar"
+4. Hacer clic en "Subir imagen" y seleccionar la imagen preparada
+5. Revisar la vista previa de la imagen
+6. Hacer clic en "Guardar"
+
+**Resultado esperado:**
+- El sistema muestra el producto con código "B456"
+- La vista previa de la imagen se muestra correctamente
+- Al guardar, muestra un mensaje de éxito
+- Al consultar el producto "B456", la imagen aparece junto con la información del producto
+
+**Severidad:** Media
+
+#### TC-04: Filtrado de productos por categoría
+
+**Relacionado con:** US-04  
+**Objetivo:** Verificar que los productos se pueden filtrar correctamente por categoría  
+**Precondiciones:**
+- La aplicación está disponible y funcionando
+- Existen productos categorizados como "limpieza del hogar" y "limpieza industrial" en el sistema
+
+**Pasos:**
+1. Abrir la aplicación
+2. Seleccionar la categoría "limpieza industrial" del filtro
+3. Observar los resultados mostrados
+4. Cambiar la selección a "limpieza del hogar"
+5. Observar los resultados mostrados
+6. Quitar el filtro de categoría
+7. Observar los resultados mostrados
+
+**Resultado esperado:**
+- Al seleccionar "limpieza industrial", solo se muestran productos de esta categoría
+- Al seleccionar "limpieza del hogar", solo se muestran productos de esta categoría
+- Al quitar el filtro, se muestran productos de todas las categorías
+- El filtrado se realiza en menos de 3 segundos
+
+**Severidad:** Media
+
 ## 3. Detalles Técnicos
 
-### 3.1 Detalles de Front-End
+### 3.1 Arquitectura
+
+La arquitectura de la aplicación Interlimpia sigue un patrón cliente-servidor con una aplicación móvil React Native que se comunica con un backend mediante una API RESTful. El siguiente diagrama muestra los componentes principales del sistema:
+
+```mermaid
+graph TD
+    A[Aplicación Móvil\nReact Native] -->|Consultas| B[API RESTful]
+    B -->|Respuestas| A
+    B -->|Almacena/Consulta| C[(Base de Datos\nMySQL)]
+    D[Administrador] -->|Actualiza| E[Panel de Administración\nWeb]
+    E -->|Gestiona| B
+    F[Almacenamiento\nCloudinary] -->|Imágenes| B
+    
+    subgraph Frontend
+    A
+    E
+    end
+    
+    subgraph Backend
+    B
+    C
+    F
+    end
+```
+
+La arquitectura se compone de:
+
+1. **Aplicación móvil (React Native)**: Interfaz principal para vendedores/transportistas, con capacidad para funcionar en dispositivos Android 10+ e iOS 10+.
+2. **Panel de administración web**: Interfaz para que el administrador gestione productos, precios e imágenes.
+3. **API RESTful**: Capa de servicios que maneja la lógica de negocio y se comunica con la base de datos.
+4. **Base de datos MySQL**: Almacena información de productos, precios, categorías y usuarios.
+5. **Sistema de almacenamiento en la nube (Cloudinary)**: Aloja las imágenes de los productos para optimizar el rendimiento.
+
+Esta arquitectura permite una clara separación de responsabilidades, facilita el mantenimiento y proporciona la escalabilidad necesaria para manejar futuras funcionalidades como la gestión de pedidos.
+
+### 3.2 Detalles de Front-End
 
 Esta sección describe el front-end de la aplicación Interlimpia y lista los campos principales de cada módulo.
 
@@ -113,7 +339,7 @@ Esta sección describe el front-end de la aplicación Interlimpia y lista los ca
 - Contraseña
 - Botón de inicio de sesión
 
-### 3.2 Requerimientos Técnicos
+### 3.3 Requerimientos Técnicos
 
 #### Login de Administrador
 T1: Usuario - El campo no debe estar vacío
@@ -136,7 +362,7 @@ T11: Imagen - Debe seleccionarse una imagen
 T12: Imagen - Solo se permiten formatos .jpg, .png o .gif
 T13: Imagen - El tamaño máximo permitido es de 2MB
 
-### 3.3 Validaciones Funcionales
+### 3.4 Validaciones Funcionales
 
 #### Consulta de Precios
 F1: Si el código no existe, el sistema muestra un mensaje indicando que no se encontraron resultados
@@ -156,7 +382,7 @@ F9: Si la imagen no cumple con los requisitos técnicos, el sistema muestra un e
 #### Login de Administrador
 F10: Si las credenciales son incorrectas, el sistema muestra un mensaje de error
 
-### 3.4 Interfaces Externas
+### 3.5 Interfaces Externas
 
 #### Compatibilidad con Dispositivos
 La aplicación debe funcionar en:
@@ -166,7 +392,7 @@ La aplicación debe funcionar en:
 #### Tecnología de Desarrollo
 La aplicación se desarrollará utilizando React Native para asegurar la compatibilidad con Android e iOS.
 
-### 3.5 Requisitos No Funcionales
+### 3.6 Requisitos No Funcionales
 
 #### Usabilidad
 - La aplicación debe ser intuitiva y fácil de usar, permitiendo a los vendedores acceder a la información de precios en menos de 3 toques desde la pantalla principal.
@@ -182,7 +408,7 @@ La aplicación se desarrollará utilizando React Native para asegurar la compati
 - La aplicación estará disponible principalmente durante el horario laboral (8 horas diarias).
 - La aplicación requiere conexión a internet para funcionar (100% online).
 
-### 3.6 Restricciones de Diseño
+### 3.7 Restricciones de Diseño
 
 Los vendedores de Interlimpia S.A. tienen conocimientos tecnológicos muy básicos. Por lo tanto, el sistema debe ser extremadamente intuitivo y fácil de entender, con énfasis en una interfaz limpia y con elementos visuales claros.
 
