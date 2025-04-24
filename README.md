@@ -45,7 +45,7 @@ El propósito de este documento es definir los requerimientos de prueba para la 
 - **SEGURIDAD:** No se realizarán pruebas específicas de seguridad ya que la aplicación no maneja datos sensibles y operará de forma pública.
 - **PRUEBAS DE FUNCIONALIDAD FUTURA:** La funcionalidad para gestión de pedidos que se implementará en el futuro no será parte de estas pruebas.
 
-### 1.3 Definiciones, Acrónimos y Abreviaturas
+### a 1.3 Definiciones, Acrónimos y Abreviaturas
 
 | Abreviatura | Palabra |
 |-------------|---------|
@@ -271,38 +271,55 @@ La aplicación Interlimpia tendrá 2 roles principales:
 
 ### 3.1 Arquitectura
 
-La arquitectura de la aplicación Interlimpia sigue un patrón cliente-servidor con una aplicación móvil React Native que se comunica con un backend mediante una API RESTful. El siguiente diagrama muestra los componentes principales del sistema:
+La arquitectura de la aplicación Interlimpia ha sido diseñada considerando que los vendedores tienen acceso público de solo lectura, mientras que solo el administrador tiene permisos para modificar los artículos. El sistema se compone de:
 
 ```mermaid
 graph TD
-    A[Aplicación Móvil\nReact Native] -->|Consultas| B[API RESTful]
-    B -->|Respuestas| A
-    B -->|Almacena/Consulta| C[(Base de Datos\nMySQL)]
-    D[Administrador] -->|Actualiza| E[Panel de Administración\nWeb]
-    E -->|Gestiona| B
-    F[Almacenamiento\nCloudinary] -->|Imágenes| B
+    A[Aplicación Móvil para Vendedores] -->|Consultas de solo lectura| B[API RESTful]
+    B -->|Datos de productos| A
+    C[Panel Web de Administración] -->|Autenticación| B
+    C -->|Gestión de productos| B
+    B -->|Validación de permisos| D[Capa de Seguridad]
+    B -->|Almacena/Consulta| E[(Base de Datos)]
+    F[Servicio de Almacenamiento] -->|Imágenes| B
     
-    subgraph Frontend
-    A
-    E
+    subgraph "Capa de Presentación"
+        A
+        C
     end
     
-    subgraph Backend
-    B
-    C
-    F
+    subgraph "Capa de Servicios"
+        B
+        D
+    end
+    
+    subgraph "Capa de Datos"
+        E
+        F
     end
 ```
 
-La arquitectura se compone de:
+**Componentes principales:**
 
-1. **Aplicación móvil (React Native)**: Interfaz principal para vendedores/transportistas, con capacidad para funcionar en dispositivos Android 10+ e iOS 10+.
-2. **Panel de administración web**: Interfaz para que el administrador gestione productos, precios e imágenes.
-3. **API RESTful**: Capa de servicios que maneja la lógica de negocio y se comunica con la base de datos.
-4. **Base de datos MySQL**: Almacena información de productos, precios, categorías y usuarios.
-5. **Sistema de almacenamiento en la nube (Cloudinary)**: Aloja las imágenes de los productos para optimizar el rendimiento.
+1. **Aplicación móvil para vendedores (React Native)**: Interfaz pública de solo lectura que permite a los vendedores consultar precios y productos sin necesidad de autenticación. Funciona en dispositivos Android 10+ e iOS 10+.
 
-Esta arquitectura permite una clara separación de responsabilidades, facilita el mantenimiento y proporciona la escalabilidad necesaria para manejar futuras funcionalidades como la gestión de pedidos.
+2. **Panel web de administración**: Interfaz protegida que requiere autenticación, exclusivamente para el administrador. Desde aquí se gestionan productos, precios e imágenes.
+
+3. **API RESTful**: Capa de servicios con puntos de acceso diferenciados:
+   - Endpoints públicos para consultas (sin autenticación)
+   - Endpoints protegidos para operaciones de escritura (requieren autenticación)
+
+4. **Capa de seguridad**: Garantiza que solo el administrador autenticado pueda realizar modificaciones en el sistema.
+
+5. **Base de datos**: Almacena información de productos, precios, categorías y usuarios. Incluye estructura de permisos para diferenciar operaciones de lectura y escritura.
+
+6. **Servicio de almacenamiento**: Gestiona las imágenes de los productos, con permisos adecuados para que solo el administrador pueda modificarlas.
+
+Esta arquitectura asegura:
+- Separación clara entre acceso público (vendedores) y administrativo
+- Seguridad en las operaciones de modificación de datos
+- Rendimiento optimizado para consultas frecuentes
+- Escalabilidad para futuras funcionalidades
 
 ### 3.2 Detalles de Front-End
 
