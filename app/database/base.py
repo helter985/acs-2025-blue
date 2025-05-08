@@ -1,14 +1,23 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import os
 
 from app.config import settings
+from app.models.base import Base
 
-# Crear la base para los modelos ORM
-Base = declarative_base()
+# Opciones específicas para PostgreSQL
+connect_args = {}
 
 # Configuración del motor de base de datos
-engine = create_engine(settings.DATABASE_URL)
+database_url = settings.DATABASE_URL
+print(f"Connecting to database: {database_url}")
+
+engine = create_engine(
+    database_url,
+    connect_args=connect_args,
+    # Para desarrollo, es útil tener echo=True para ver las consultas SQL
+    echo=settings.DEBUG
+)
 
 # Configuración de la sesión
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -2,8 +2,8 @@
 Script para inicializar la base de datos con datos de ejemplo
 para la aplicación Interlimpia.
 
-Este script debe ejecutarse una vez para crear las tablas y cargar
-datos iniciales de categorías y productos.
+Este script debe ejecutarse después de que las migraciones de Alembic
+hayan creado las tablas. Solo carga datos iniciales de categorías y productos.
 
 Uso:
     python -m scripts.init_db
@@ -11,15 +11,67 @@ Uso:
 
 import sys
 import os
+import logging
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger("init_db")
 
 # Agregar la ruta del proyecto al PYTHONPATH
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from sqlalchemy.orm import Session
+from sqlalchemy import inspect
 
 from app.database.base import Base, engine, SessionLocal
 from app.models.categoria import Categoria
 from app.models.producto import Producto
+from app.config import settings
+
+# Verificar la conexión a la base de datos
+def check_database_connection():
+    """
+    Verifica la conexión a la base de datos.
+    """
+    try:
+        # Imprimir información de la base de datos
+        logger.info(f"Intentando conectar a: {settings.DATABASE_URL}")
+        
+        # Intentar conectar
+        db = SessionLocal()
+        result = db.execute("SELECT 1").fetchone()
+        db.close()
+        
+        if result:
+            logger.info("Conexión a la base de datos establecida correctamente")
+            return True
+        else:
+            logger.error("La consulta de prueba no retornó resultados")
+            return False
+    except Exception as e:
+        logger.error(f"Error al conectar a la base de datos: {str(e)}")
+        return False
+
+# Verificar si las tablas existen
+def check_tables_exist():
+    """
+    Verifica si las tablas existen en la base de datos.
+    """
+    inspector = inspect(engine)
+    existing_tables = inspector.get_table_names()
+    expected_tables = ['categorias', 'productos']
+    
+    logger.info(f"Tablas encontradas: {existing_tables}")
+    
+    for table in expected_tables:
+        if table not in existing_tables:
+            logger.warning(f"La tabla {table} no existe. Ejecute las migraciones de Alembic primero.")
+            return False
+    
+    return True
 
 
 def init_categorias(db: Session):
