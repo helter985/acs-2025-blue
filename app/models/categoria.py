@@ -12,9 +12,9 @@ class Categoria(Base):
     """
     __tablename__ = "categorias"
     
-    id = Column(String, primary_key=True, index=True)
-    nombre = Column(String, nullable=False)
-    descripcion = Column(String, nullable=True)
+    id = Column(String(36), primary_key=True, index=True)
+    nombre = Column(String(100), nullable=False)
+    descripcion = Column(String(255), nullable=True)
     
     # Relación con la tabla productos
     productos = relationship("Producto", back_populates="categoria_rel")

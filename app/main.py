@@ -8,7 +8,7 @@ from app.config import settings
 from app.controllers.producto_controller import router as producto_router
 from app.controllers.categoria_controller import router as categoria_router
 from app.dtos.error import ErrorResponse
-from app.database.base import Base, engine, SessionLocal
+from app.database.base import SessionLocal
 
 # Configurar logging
 logging.basicConfig(
@@ -66,7 +66,7 @@ async def root():
         "nombre": settings.APP_NAME,
         "version": "1.0.0",
         "estado": "Operativa",
-        "database_url_type": settings.DATABASE_URL.split("://")[0]
+        "database_url_type": settings.DATABASE_URL.split("://")[0] if settings.DATABASE_URL else "unknown"
     }
 
 
@@ -81,7 +81,10 @@ async def health_check():
     try:
         # Intentar conectar a la base de datos
         db = SessionLocal()
-        result = db.execute("SELECT 1").fetchone()
+        connection = db.connection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT 1")
+        result = cursor.fetchone()
         db.close()
         
         db_connected = result is not None
@@ -109,7 +112,7 @@ async def startup_event():
     Evento que se ejecuta al iniciar la aplicación.
     """
     logger.info(f"Iniciando {settings.APP_NAME}")
-    logger.info(f"Conectando a la base de datos: {settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else settings.DATABASE_URL}")
+    logger.info(f"Conectando a la base de datos: {settings.DATABASE_URL}")
     
     # No creamos tablas aquí para evitar conflictos con Alembic
     # Base.metadata.create_all(bind=engine)

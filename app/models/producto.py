@@ -12,13 +12,13 @@ class Producto(Base):
     """
     __tablename__ = "productos"
     
-    codigo = Column(String, primary_key=True, index=True)
-    marca = Column(String, nullable=False, index=True)
-    descripcion = Column(String, nullable=False, index=True)
+    codigo = Column(String(50), primary_key=True, index=True)
+    marca = Column(String(100), nullable=False, index=True)
+    descripcion = Column(String(255), nullable=False, index=True)
     precio = Column(Float, nullable=False)
-    categoria = Column(String, ForeignKey("categorias.id"), nullable=False)
-    imagen_url = Column(String, nullable=True)
-    proveedor = Column(String, nullable=False)
+    categoria = Column(String(36), ForeignKey("categorias.id"), nullable=False)
+    imagen_url = Column(String(255), nullable=True)
+    proveedor = Column(String(100), nullable=False)
     
     # Relación con la tabla categorías
     categoria_rel = relationship("Categoria", back_populates="productos")
