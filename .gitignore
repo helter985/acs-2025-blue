@@ -71,6 +71,18 @@ Dockerfile.local
 *.sqlite3
 *.db
 
+# Alembic
+# Ignora los archivos generados automáticamente, pero mantén las plantillas y configuraciones
+alembic/versions/__pycache__/
+alembic/__pycache__/
+# No ignores los archivos de migración - estos deben estar en control de versiones
+# alembic/versions/*.py
+# Ignora archivos temporales que Alembic podría crear
+alembic/*.pyc
+alembic/*.pyo
+alembic/*.pyd
+alembic.ini.local
+
 # IDE
 .idea/
 .vscode/
