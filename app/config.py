@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
@@ -16,15 +17,15 @@ class Settings(BaseSettings):
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     
     # Configuración de MySQL
-    MYSQL_USER: str | None = None
-    MYSQL_PASSWORD: str | None = None
-    MYSQL_DATABASE: str | None = None
-    MYSQL_PORT: str | None = None
+    MYSQL_USER: Optional[str] = None
+    MYSQL_PASSWORD: Optional[str] = None
+    MYSQL_DATABASE: Optional[str] = None
+    MYSQL_PORT: Optional[str] = None
     MYSQL_HOST: str = os.getenv("MYSQL_HOST", "localhost")
-    MYSQL_ROOT_PASSWORD: str | None = None
+    MYSQL_ROOT_PASSWORD: Optional[str] = None
     
     # Configuración de la base de datos
-    DATABASE_URL: str | None = None
+    DATABASE_URL: Optional[str] = None
     
     # Configuración de almacenamiento de imágenes
     STORAGE_URL: str = os.getenv(
