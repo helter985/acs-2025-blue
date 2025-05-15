@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 import time
 
+from sqlalchemy import text
+
 from app.config import settings
 from app.controllers.producto_controller import router as producto_router
 from app.controllers.categoria_controller import router as categoria_router
@@ -79,17 +81,12 @@ async def health_check():
     """
     start_time = time.time()
     try:
-        # Intentar conectar a la base de datos
         db = SessionLocal()
-        connection = db.connection()
-        cursor = connection.cursor()
-        cursor.execute("SELECT 1")
-        result = cursor.fetchone()
-        db.close()
-        
-        db_connected = result is not None
+        result = db.execute(text("SELECT 1")).scalar()
+        db_connected = result == 1
         response_time = time.time() - start_time
-        
+        db.close()
+
         return {
             "status": "healthy" if db_connected else "unhealthy",
             "database_connected": db_connected,
@@ -104,7 +101,6 @@ async def health_check():
             "response_time_ms": round((time.time() - start_time) * 1000, 2)
         }
 
-
 # Evento de inicio de la aplicación
 @app.on_event("startup")
 async def startup_event():
@@ -112,7 +108,6 @@ async def startup_event():
     Evento que se ejecuta al iniciar la aplicación.
     """
     logger.info(f"Iniciando {settings.APP_NAME}")
-    logger.info(f"Conectando a la base de datos: {settings.DATABASE_URL}")
     
     # No creamos tablas aquí para evitar conflictos con Alembic
     # Base.metadata.create_all(bind=engine)
