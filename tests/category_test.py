@@ -34,7 +34,7 @@ class CategoriaTestCase(unittest.TestCase):
 
         # FIXED: Use the correct URL that matches your router configuration
         # Your router has prefix="/categorias" and is included with prefix="/api/v1"
-        response = self.client.get("/api/v1/categorias")
+        response = self.client.get("/v1/api/categorias")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [
@@ -55,7 +55,7 @@ class CategoriaTestCase(unittest.TestCase):
             mock_service_instance.obtener_categorias.side_effect = Exception("Database error")
             mock_categoria_service.return_value = mock_service_instance
             
-            response = self.client.get("/api/v1/categorias")
+            response = self.client.get("/v1/api/categorias")
             
             self.assertEqual(response.status_code, 500)
             response_json = response.json()

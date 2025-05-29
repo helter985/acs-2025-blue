@@ -38,7 +38,7 @@ class TestProductoEndpoints(unittest.IsolatedAsyncioTestCase):
 
             # CORRECCIÓN AQUÍ
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-                response = await ac.get("/api/v1/productos")
+                response = await ac.get("/v1/api/productos")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -57,7 +57,7 @@ class TestProductoEndpoints(unittest.IsolatedAsyncioTestCase):
 
             # CORRECCIÓN AQUÍ
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-                response = await ac.get("/api/v1/productos")
+                response = await ac.get("/v1/api/productos")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -84,7 +84,7 @@ class TestProductoEndpoints(unittest.IsolatedAsyncioTestCase):
             mock_service_class.return_value = mock_service_instance 
 
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-                response = await ac.get("/api/v1/productos?marca=MarcaA&categoria=limpieza_hogar")
+                response = await ac.get("/v1/api/productos?marca=MarcaA&categoria=limpieza_hogar")
 
             # Verify that the service was called with the correct parameters
             # The "Actual" call from the traceback was: obtener_productos('MarcaA', None, 'limpieza_hogar', None)
@@ -122,7 +122,7 @@ class TestProductoEndpoints(unittest.IsolatedAsyncioTestCase):
 
             # CORRECCIÓN AQUÍ
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-                response = await ac.get("/api/v1/productos/P001")
+                response = await ac.get("/v1/api/productos/P001")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -139,7 +139,7 @@ class TestProductoEndpoints(unittest.IsolatedAsyncioTestCase):
 
             # CORRECCIÓN AQUÍ
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-                response = await ac.get("/api/v1/productos/NO_EXISTE")
+                response = await ac.get("/v1/api/productos/NO_EXISTE")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         data = response.json()
@@ -164,7 +164,7 @@ class TestProductoEndpoints(unittest.IsolatedAsyncioTestCase):
 
             # CORRECCIÓN AQUÍ
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-                response = await ac.get("/api/v1/productos")
+                response = await ac.get("/v1/api/productos")
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         data = response.json()
@@ -187,7 +187,7 @@ class TestProductoEndpoints(unittest.IsolatedAsyncioTestCase):
 
             # CORRECCIÓN AQUÍ
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-                response = await ac.get("/api/v1/productos/P001")
+                response = await ac.get("/v1/api/productos/P001")
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         data = response.json()
