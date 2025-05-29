@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     Permite cargar configuraciones desde variables de entorno.
     """
     APP_NAME: str = "Interlimpia API"
-    API_PREFIX: str = "/api"
+    API_PREFIX: str = "/api/v1"
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     
     # Configuración de MySQL
